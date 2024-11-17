@@ -245,86 +245,34 @@ except Exception as e:
 
 
 
-# Mediapipe initialization
-mp_hands = mp.solutions.hands
+def sign_detection():
+    st.subheader("Real-time Sign Detection")
+    st.write("Point your camera to detect ASL signs in real-time.")
 
-# Define the VideoTransformer class for real-time processing
-class HandSignTransformer(VideoTransformerBase):
-    def __init__(self):
-        self.hands = mp_hands.Hands(min_detection_confidence=0.7, min_tracking_confidence=0.5)
-        self.mp_draw = mp.solutions.drawing_utils
+    mp_hands = mp.solutions.hands
+    hands = mp_hands.Hands(min_detection_confidence=0.7, min_tracking_confidence=0.5)
+    mp_draw = mp.solutions.drawing_utils
 
-    def transform(self, frame):
-        # Read the frame from WebRTC
-        img = frame.to_ndarray(format="bgr24")
+    # Use Streamlit's camera input
+    video_input = st.camera_input("Take a photo")
 
-        # Convert to RGB for Mediapipe
-        img_rgb = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
+    if video_input:
+        # Convert the Streamlit input to an OpenCV-compatible format
+        video_bytes = video_input.getvalue()
+        frame = cv2.imdecode(np.frombuffer(video_bytes, np.uint8), cv2.IMREAD_COLOR)
 
-        # Process frame with Mediapipe Hands
-        results = self.hands.process(img_rgb)
+        frame_rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+        results = hands.process(frame_rgb)
 
-        # If hand landmarks detected, process them
+        # If hand landmarks are detected, process them
         if results.multi_hand_landmarks:
             for hand_landmarks in results.multi_hand_landmarks:
-                self.mp_draw.draw_landmarks(img, hand_landmarks, mp_hands.HAND_CONNECTIONS)
+                mp_draw.draw_landmarks(frame, hand_landmarks, mp_hands.HAND_CONNECTIONS)
 
-                # Extract landmarks for prediction
-                x_ = []
-                y_ = []
-                data_aux = []
-                for lm in hand_landmarks.landmark:
-                    x_.append(lm.x)
-                    y_.append(lm.y)
-
-                for i in range(len(hand_landmarks.landmark)):
-                    data_aux.append(hand_landmarks.landmark[i].x - min(x_))
-                    data_aux.append(hand_landmarks.landmark[i].y - min(y_))
-
-                # Prepare data for model prediction
-                data_aux = np.asarray(data_aux).reshape(1, -1)
-
-                # Predict with the model
-                prediction = model.predict(data_aux)
-                predicted_class_index = np.argmax(prediction, axis=1)[0]
-                predicted_probability = prediction[0][predicted_class_index]
-
-                # Display the prediction if confidence is high
-                if predicted_probability >= 0.3:
-                    predicted_character = label_dict.get(str(predicted_class_index), "Unknown")
-                    cv2.putText(
-                        img, 
-                        f"Prediction: {predicted_character} ({predicted_probability * 100:.2f}%)",
-                        (10, 30), 
-                        cv2.FONT_HERSHEY_SIMPLEX, 
-                        1, 
-                        (0, 255, 0), 
-                        2
-                    )
-                else:
-                    cv2.putText(
-                        img, 
-                        "Prediction: Unknown",
-                        (10, 30), 
-                        cv2.FONT_HERSHEY_SIMPLEX, 
-                        1, 
-                        (0, 0, 255), 
-                        2
-                    )
-
-        return img
-
-# Define the sign_detection function
-def sign_detection():
-    st.title("Real-Time Hand Sign Detection")
-    st.write("This app detects hand signs in real-time using your webcam.")
-
-    # Initialize the webrtc streamer
-    webrtc_streamer(
-        key="hand-sign-detection",
-        video_transformer_factory=HandSignTransformer,
-        media_stream_constraints={"video": True, "audio": False},
-    )
+            # Example: Display frame
+            st.image(frame, channels="BGR", caption="Processed Frame with Landmarks")
+        else:
+            st.image(frame, channels="BGR", caption="No hand detected.")
 
 
 
