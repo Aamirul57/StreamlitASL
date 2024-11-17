@@ -245,68 +245,30 @@ def sign_detection():
     st.subheader("Real-time Sign Detection")
     st.write("Point your camera to detect ASL signs in real-time.")
 
-    # Initialize mediapipe hands module
     mp_hands = mp.solutions.hands
     hands = mp_hands.Hands(min_detection_confidence=0.7, min_tracking_confidence=0.5)
     mp_draw = mp.solutions.drawing_utils
 
-    # Start capturing video from the camera
-    cap = cv2.VideoCapture(0)  # 0 is the default webcam
-    if not cap.isOpened():
-        st.error("Error: Could not access the camera.")
-        return
+    # Use Streamlit's camera input
+    video_input = st.camera_input("Take a photo")
 
-    # Create an empty container for updating the frame
-    frame_placeholder = st.empty()
+    if video_input:
+        # Convert the Streamlit input to an OpenCV-compatible format
+        video_bytes = video_input.getvalue()
+        frame = cv2.imdecode(np.frombuffer(video_bytes, np.uint8), cv2.IMREAD_COLOR)
 
-    while cap.isOpened():
-        ret, frame = cap.read()
-        if not ret:
-            st.error("Failed to grab frame.")
-            break
-
-        # Convert the frame to RGB for mediapipe
         frame_rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
-
-        # Process the frame using Mediapipe
         results = hands.process(frame_rgb)
 
-        # If hand landmarks are detected, draw them on the frame
+        # If hand landmarks are detected, process them
         if results.multi_hand_landmarks:
             for hand_landmarks in results.multi_hand_landmarks:
                 mp_draw.draw_landmarks(frame, hand_landmarks, mp_hands.HAND_CONNECTIONS)
 
-                # Prepare data for model prediction
-                x_ = [lm.x for lm in hand_landmarks.landmark]
-                y_ = [lm.y for lm in hand_landmarks.landmark]
-                data_aux = []
-                for lm in hand_landmarks.landmark:
-                    data_aux.extend([lm.x - min(x_), lm.y - min(y_)])
-
-                # Reshape data for prediction
-                data_aux = np.asarray(data_aux).reshape(1, -1)
-                prediction = model.predict(data_aux)
-
-                # Get the predicted class and its probability
-                predicted_class_index = np.argmax(prediction, axis=1)[0]
-                predicted_probability = prediction[0][predicted_class_index]
-
-                # Check if the prediction meets a threshold
-                if predicted_probability >= 0.3:
-                    predicted_key = str(predicted_class_index)
-                    predicted_character = label_dict.get(predicted_key, "Unknown")
-                else:
-                    predicted_character = "Unknown"
-
-                # Display the prediction
-                caption = f"Prediction: {predicted_character} ({predicted_probability * 100:.2f}%)"
-                frame_bgr = cv2.cvtColor(frame, cv2.COLOR_RGB2BGR)
-                frame_placeholder.image(frame_bgr, caption=caption, channels="BGR")
+            # Example: Display frame
+            st.image(frame, channels="BGR", caption="Processed Frame with Landmarks")
         else:
-            frame_bgr = cv2.cvtColor(frame, cv2.COLOR_RGB2BGR)
-            frame_placeholder.image(frame_bgr, caption="No hand detected.", channels="BGR")
-
-    cap.release()
+            st.image(frame, channels="BGR", caption="No hand detected.")
 
 
 
