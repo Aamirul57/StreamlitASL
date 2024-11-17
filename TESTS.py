@@ -253,13 +253,18 @@ def sign_detection():
     hands = mp_hands.Hands(min_detection_confidence=0.7, min_tracking_confidence=0.5)
     mp_draw = mp.solutions.drawing_utils
 
-    # Use Streamlit's camera input
-    video_input = st.camera_input("Take a photo")
+    # OpenCV to access webcam (use OpenCV to capture video)
+    cap = cv2.VideoCapture(0)  # Use 0 for the default webcam
 
-    if video_input:
-        # Convert the Streamlit input to an OpenCV-compatible format
-        video_bytes = video_input.getvalue()
-        frame = cv2.imdecode(np.frombuffer(video_bytes, np.uint8), cv2.IMREAD_COLOR)
+    if not cap.isOpened():
+        st.error("Could not access the camera")
+        return
+
+    while True:
+        ret, frame = cap.read()
+        if not ret:
+            st.error("Failed to capture frame")
+            break
 
         frame_rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
         results = hands.process(frame_rgb)
@@ -269,10 +274,22 @@ def sign_detection():
             for hand_landmarks in results.multi_hand_landmarks:
                 mp_draw.draw_landmarks(frame, hand_landmarks, mp_hands.HAND_CONNECTIONS)
 
-            # Example: Display frame
-            st.image(frame, channels="BGR", caption="Processed Frame with Landmarks")
+            # Example: Add text to the frame (you can replace this with other OpenCV functions)
+            cv2.putText(frame, 'ASL Detection: Active', (50, 50), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2)
+
         else:
-            st.image(frame, channels="BGR", caption="No hand detected.")
+            # If no hand is detected
+            cv2.putText(frame, 'No Hand Detected', (50, 50), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 2)
+
+        # Display the processed frame in Streamlit
+        st.image(frame, channels="BGR", caption="Processed Frame with Hand Landmarks", use_column_width=True)
+
+        # Add a break condition to stop the loop (e.g., user clicks a button)
+        if st.button("Stop"):
+            break
+
+    # Release the webcam when done
+    cap.release()
 
 
 
