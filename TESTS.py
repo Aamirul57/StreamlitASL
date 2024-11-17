@@ -254,6 +254,13 @@ def sign_detection():
     mp_draw = mp.solutions.drawing_utils
 
     
+    import streamlit.components.v1 as components
+
+    def webcam_component():
+        component = components.declare_component("webcam_component", path="camera")
+        return component
+
+    
 
     # OpenCV to access webcam (use OpenCV to capture video)
     cap = cv2.VideoCapture(0)  # Use 0 for the default webcam
@@ -292,12 +299,6 @@ def sign_detection():
 
     # Release the webcam when done
     cap.release()
-
-    import streamlit.components.v1 as components
-
-    def webcam_component():
-        component = components.declare_component("webcam_component", path="camera")
-        return component
 
 
 
