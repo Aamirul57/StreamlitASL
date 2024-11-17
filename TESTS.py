@@ -8,7 +8,9 @@ import os
 from tensorflow.keras.models import load_model
 import mediapipe as mp
 import requests
-
+# import copy
+from multiprocessing import Queue, Process
+from typing import NamedTuple, List
 
 print(cv2.__version__)
 
