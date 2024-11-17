@@ -8,11 +8,7 @@ import os
 from tensorflow.keras.models import load_model
 import mediapipe as mp
 import requests
-# import copy
-from multiprocessing import Queue, Process
-from typing import NamedTuple, List
 
-print(cv2.__version__)
 
 
 # File paths
@@ -235,7 +231,15 @@ label_dict = {
 }
 
 # Load the pre-trained model
-model = load_model("./AisyahSignX100.keras")  # Replace with your actual model path
+# model = load_model("./AisyahSignX100.keras")  # Replace with your actual model path
+
+try:
+    model = load_model("./AisyahSignX100.keras")
+    print("Model loaded successfully!")
+except Exception as e:
+    print("Error loading model:", e)
+
+
 
 def sign_detection():
     st.subheader("Real-time Sign Detection")
