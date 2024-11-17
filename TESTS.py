@@ -293,6 +293,13 @@ def sign_detection():
     # Release the webcam when done
     cap.release()
 
+    import streamlit.components.v1 as components
+
+    def webcam_component():
+        component = components.declare_component("webcam_component", path="my_component")
+        return component
+
+
 
 
 
