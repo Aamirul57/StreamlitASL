@@ -262,6 +262,8 @@ def sign_detection():
         else:
             print(f"Camera at index {index} is not available.")
         index += 1
+        if index>10:
+            break
 
     # OpenCV to access webcam (use OpenCV to capture video)
     cap = cv2.VideoCapture(index)  # Use 0 for the default webcam
