@@ -7,9 +7,15 @@ dependencies:
   - pip
   - pip:
       - streamlit
+      - streamlit-webrtc
       - opencv-python
       - mediapipe
       - numpy
       - tensorflow
       - pandas
       - matplotlib
+      - mediapipe
+      - gdown
+    
+    
+    
