@@ -245,54 +245,43 @@ def sign_detection():
     st.subheader("Real-time Sign Detection")
     st.write("Point your camera to detect ASL signs in real-time.")
 
-    st.title("Webcam Feed")
-    video_input = st.camera_input("Take a photo")
-    if video_input:
-        st.image(video_input)
-        
-        # Initialize mediapipe hands module
-        mp_hands = mp.solutions.hands
-        hands = mp_hands.Hands(min_detection_confidence=0.7, min_tracking_confidence=0.5)
-        mp_draw = mp.solutions.drawing_utils
+    # Initialize mediapipe hands module
+    mp_hands = mp.solutions.hands
+    hands = mp_hands.Hands(min_detection_confidence=0.7, min_tracking_confidence=0.5)
+    mp_draw = mp.solutions.drawing_utils
 
-        # Start capturing video from the camera
-        cap = cv2.VideoCapture(0)
+    # Start capturing video from the camera
+    cap = cv2.VideoCapture(0)  # 0 is the default webcam
+    if not cap.isOpened():
+        st.error("Error: Could not access the camera.")
+        return
 
-        if not cap.isOpened():
-            st.write("Error: Could not access the camera.")
-            pass
+    # Create an empty container for updating the frame
+    frame_placeholder = st.empty()
 
-        # Create an empty container for updating the frame
-        frame_placeholder = st.empty()
+    while cap.isOpened():
+        ret, frame = cap.read()
+        if not ret:
+            st.error("Failed to grab frame.")
+            break
 
-        while True:
-            ret, frame = cap.read()
-            if not ret:
-                st.write("Failed to grab frame.")
-                break
-            
-            # Convert the frame to RGB for mediapipe
-            frame_rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
-            
-            # Process the frame using Mediapipe
-            results = hands.process(frame_rgb)
+        # Convert the frame to RGB for mediapipe
+        frame_rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
 
-            # If hand landmarks are detected, draw them on the frame
-            if results.multi_hand_landmarks:
-                for hand_landmarks in results.multi_hand_landmarks:
-                    mp_draw.draw_landmarks(frame, hand_landmarks, mp_hands.HAND_CONNECTIONS)
-                    
-                # Prepare the data for model prediction
-                x_ = []
-                y_ = []
+        # Process the frame using Mediapipe
+        results = hands.process(frame_rgb)
+
+        # If hand landmarks are detected, draw them on the frame
+        if results.multi_hand_landmarks:
+            for hand_landmarks in results.multi_hand_landmarks:
+                mp_draw.draw_landmarks(frame, hand_landmarks, mp_hands.HAND_CONNECTIONS)
+
+                # Prepare data for model prediction
+                x_ = [lm.x for lm in hand_landmarks.landmark]
+                y_ = [lm.y for lm in hand_landmarks.landmark]
                 data_aux = []
-                for i in range(len(hand_landmarks.landmark)):
-                    x = hand_landmarks.landmark[i].x
-                    y = hand_landmarks.landmark[i].y
-                    x_.append(x)
-                    y_.append(y)
-                    data_aux.append(x - min(x_))
-                    data_aux.append(y - min(y_))
+                for lm in hand_landmarks.landmark:
+                    data_aux.extend([lm.x - min(x_), lm.y - min(y_)])
 
                 # Reshape data for prediction
                 data_aux = np.asarray(data_aux).reshape(1, -1)
@@ -302,18 +291,20 @@ def sign_detection():
                 predicted_class_index = np.argmax(prediction, axis=1)[0]
                 predicted_probability = prediction[0][predicted_class_index]
 
-                # Check if the prediction is above a threshold (e.g., 30%)
+                # Check if the prediction meets a threshold
                 if predicted_probability >= 0.3:
                     predicted_key = str(predicted_class_index)
-                    predicted_character = label_dict.get(predicted_key, 'Unknown')
+                    predicted_character = label_dict.get(predicted_key, "Unknown")
                 else:
-                    predicted_character = 'Unknown'
+                    predicted_character = "Unknown"
 
-                # Display the prediction and the frame
-                frame_bgr = cv2.cvtColor(frame, cv2.COLOR_RGB2BGR)  # Convert back to BGR for Streamlit
-                frame_placeholder.image(frame_bgr, caption=f"Prediction: {predicted_character} ({predicted_probability * 100:.2f}%)", channels="BGR")
-            else:
-                frame_placeholder.image(frame, caption="No hand detected.", channels="BGR")
+                # Display the prediction
+                caption = f"Prediction: {predicted_character} ({predicted_probability * 100:.2f}%)"
+                frame_bgr = cv2.cvtColor(frame, cv2.COLOR_RGB2BGR)
+                frame_placeholder.image(frame_bgr, caption=caption, channels="BGR")
+        else:
+            frame_bgr = cv2.cvtColor(frame, cv2.COLOR_RGB2BGR)
+            frame_placeholder.image(frame_bgr, caption="No hand detected.", channels="BGR")
 
     cap.release()
 
