@@ -265,6 +265,8 @@ def sign_detection():
         if index>10:
             break
 
+    st.write(f"Index: {index}")
+
     # OpenCV to access webcam (use OpenCV to capture video)
     cap = cv2.VideoCapture(index)  # Use 0 for the default webcam
 
