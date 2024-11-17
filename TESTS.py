@@ -197,89 +197,143 @@ def show_progress(username):
     else:
         st.table(user_progress)
 
-import time
-import cv2
-import numpy as np
+import os
+from tensorflow.keras.models import load_model
 import streamlit as st
+import cv2
 import mediapipe as mp
+import numpy as np
 
-# Initialize Mediapipe and model
-mp_hands = mp.solutions.hands
-mp_draw = mp.solutions.drawing_utils
+# Updated label dictionary
+label_dict = {
+    '0': 'A',
+    '1': 'B',
+    '2': 'C',
+    '3': 'D',
+    '4': 'E',
+    '5': 'F',
+    '6': 'G',
+    '7': 'H',
+    '8': 'I',
+    '9': 'K',
+    '10': 'L',
+    '11': 'M',
+    '12': 'N',
+    '13': 'O',
+    '14': 'P',
+    '15': 'Q',
+    '16': 'R',
+    '17': 'S',
+    '18': 'T',
+    '19': 'U',
+    '20': 'V',
+    '21': 'W',
+    '22': 'X',
+    '23': 'Y',
+}
 
-# Dummy model and labels (replace with your trained model and labels)
-class DummyModel:
-    def predict(self, data):
-        return [[0.1, 0.9]]  # Example probabilities
+# Load the pre-trained model
+model = load_model("AisyahSignX100.keras")  # Replace with your actual model path
 
-model = DummyModel()
-label_dict = {0: "A", 1: "B"}  # Replace with your actual label dictionary
-
-# Real-time video detection
 def sign_detection():
-    st.title("Real-Time ASL Sign Detection")
-    st.write("This feature uses your webcam for detecting ASL signs.")
+    st.subheader("Real-time Sign Detection")
+    st.write("Point your camera to detect ASL signs in real-time.")
 
-    # Access webcam
-    run_detection = st.checkbox("Start Webcam")
-    frame_placeholder = st.empty()
+    st.title("Webcam Feed")
+# video_input = st.camera_input("Take a photo")
+# if video_input:
+#     st.image(video_input)
+    
+#     # Initialize mediapipe hands module
+#     mp_hands = mp.solutions.hands
+#     hands = mp_hands.Hands(min_detection_confidence=0.7, min_tracking_confidence=0.5)
+#     mp_draw = mp.solutions.drawing_utils
 
-    if run_detection:
-        cap = cv2.VideoCapture(0)  # Open webcam feed
+#     # Start capturing video from the camera
+#     cap = cv2.VideoCapture(0)
 
-        if not cap.isOpened():
-            st.error("Error: Could not access the camera.")
-            return
+#     if not cap.isOpened():
+#         st.write("Error: Could not access the camera.")
+#         pass
 
-        with mp_hands.Hands(min_detection_confidence=0.7, min_tracking_confidence=0.5) as hands:
-            while run_detection:
-                ret, frame = cap.read()
-                if not ret:
-                    st.error("Failed to grab frame.")
-                    break
+#     # Create an empty container for updating the frame
+#     frame_placeholder = st.empty()
 
-                # Convert frame to RGB for Mediapipe
-                frame_rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
-                results = hands.process(frame_rgb)
+#     while True:
+#         ret, frame = cap.read()
+#         if not ret:
+#             st.write("Failed to grab frame.")
+#             break
+        
+#         # Convert the frame to RGB for mediapipe
+#         frame_rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+        
+#         # Process the frame using Mediapipe
+#         results = hands.process(frame_rgb)
 
-                # If hand landmarks detected
-                if results.multi_hand_landmarks:
-                    for hand_landmarks in results.multi_hand_landmarks:
-                        mp_draw.draw_landmarks(frame, hand_landmarks, mp_hands.HAND_CONNECTIONS)
+#         # If hand landmarks are detected, draw them on the frame
+#         if results.multi_hand_landmarks:
+#             for hand_landmarks in results.multi_hand_landmarks:
+#                 mp_draw.draw_landmarks(frame, hand_landmarks, mp_hands.HAND_CONNECTIONS)
+                
+#             # Prepare the data for model prediction
+#             x_ = []
+#             y_ = []
+#             data_aux = []
+#             for i in range(len(hand_landmarks.landmark)):
+#                 x = hand_landmarks.landmark[i].x
+#                 y = hand_landmarks.landmark[i].y
+#                 x_.append(x)
+#                 y_.append(y)
+#                 data_aux.append(x - min(x_))
+#                 data_aux.append(y - min(y_))
 
-                        # Prepare data for prediction
-                        x_ = [lm.x for lm in hand_landmarks.landmark]
-                        y_ = [lm.y for lm in hand_landmarks.landmark]
-                        data_aux = [coord for pair in zip(x_, y_) for coord in pair]
+#             # Reshape data for prediction
+#             data_aux = np.asarray(data_aux).reshape(1, -1)
+#             prediction = model.predict(data_aux)
 
-                        # Predict
-                        data_aux = np.array(data_aux).reshape(1, -1)
-                        prediction = model.predict(data_aux)
-                        predicted_class_index = np.argmax(prediction, axis=1)[0]
-                        predicted_probability = prediction[0][predicted_class_index]
+#             # Get the predicted class and its probability
+#             predicted_class_index = np.argmax(prediction, axis=1)[0]
+#             predicted_probability = prediction[0][predicted_class_index]
 
-                        # Display prediction
-                        if predicted_probability >= 0.3:
-                            predicted_character = label_dict.get(predicted_class_index, "Unknown")
-                        else:
-                            predicted_character = "Unknown"
+#             # Check if the prediction is above a threshold (e.g., 30%)
+#             if predicted_probability >= 0.3:
+#                 predicted_key = str(predicted_class_index)
+#                 predicted_character = label_dict.get(predicted_key, 'Unknown')
+#             else:
+#                 predicted_character = 'Unknown'
 
-                        # Add text overlay to the frame
-                        cv2.putText(
-                            frame,
-                            f"Prediction: {predicted_character} ({predicted_probability * 100:.2f}%)",
-                            (10, 50),
-                            cv2.FONT_HERSHEY_SIMPLEX,
-                            1,
-                            (0, 255, 0),
-                            2,
-                        )
+#             # Display the prediction and the frame
+#             frame_bgr = cv2.cvtColor(frame, cv2.COLOR_RGB2BGR)  # Convert back to BGR for Streamlit
+#             frame_placeholder.image(frame_bgr, caption=f"Prediction: {predicted_character} ({predicted_probability * 100:.2f}%)", channels="BGR")
+#         else:
+#             frame_placeholder.image(frame, caption="No hand detected.", channels="BGR")
 
-                # Display frame in Streamlit
-                frame_bgr = cv2.cvtColor(frame, cv2.COLOR_RGB2BGR)
-                frame_placeholder.image(frame_bgr, channels="BGR", use_column_width=True)
+#     cap.release()
 
-        cap.release()
+import cv2
+from streamlit_webrtc import VideoTransformerBase, webrtc_streamer
+
+faceCascade = cv2.CascadeClassifier(cv2.haarcascades+'haarcascade_frontalface_default.xml')
+
+
+class VideoTransformer(VideoTransformerBase):
+    def init(self):
+        self.i = 0
+
+    def transform(self, frame):
+        img = frame.to_ndarray(format="bgr24")
+        gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+        faces = faceCascade.detectMultiScale(gray, 1.3, 5)
+        i =self.i+1
+        for (x, y, w, h) in faces:
+            cv2.rectangle(img, (x, y), (x + w, y + h), (95, 207, 30), 3)
+            cv2.rectangle(img, (x, y - 40), (x + w, y), (95, 207, 30), -1)
+            cv2.putText(img, 'F-' + str(i), (x, y - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.8, (0, 0, 0), 2)
+
+        return img
+
+webrtc_streamer(key="example", video_transformer_factory=VideoTransformer)
 
 
 # Quiz feature
