@@ -253,22 +253,10 @@ def sign_detection():
     hands = mp_hands.Hands(min_detection_confidence=0.7, min_tracking_confidence=0.5)
     mp_draw = mp.solutions.drawing_utils
 
-    index = 0
-    while True:
-        cap = cv2.VideoCapture(index)
-        if cap.isOpened():
-            print(f"Camera at index {index} is available.")
-            cap.release()
-        else:
-            print(f"Camera at index {index} is not available.")
-        index += 1
-        if index>10:
-            break
-
-    st.write(f"Index: {index}")
+    
 
     # OpenCV to access webcam (use OpenCV to capture video)
-    cap = cv2.VideoCapture(index)  # Use 0 for the default webcam
+    cap = cv2.VideoCapture(0)  # Use 0 for the default webcam
 
     if not cap.isOpened():
         st.error("Could not access the camera")
