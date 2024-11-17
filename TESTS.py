@@ -242,100 +242,78 @@ def sign_detection():
     st.write("Point your camera to detect ASL signs in real-time.")
 
     st.title("Webcam Feed")
-# video_input = st.camera_input("Take a photo")
-# if video_input:
-#     st.image(video_input)
+video_input = st.camera_input("Take a photo")
+if video_input:
+    st.image(video_input)
     
-#     # Initialize mediapipe hands module
-#     mp_hands = mp.solutions.hands
-#     hands = mp_hands.Hands(min_detection_confidence=0.7, min_tracking_confidence=0.5)
-#     mp_draw = mp.solutions.drawing_utils
+    # Initialize mediapipe hands module
+    mp_hands = mp.solutions.hands
+    hands = mp_hands.Hands(min_detection_confidence=0.7, min_tracking_confidence=0.5)
+    mp_draw = mp.solutions.drawing_utils
 
-#     # Start capturing video from the camera
-#     cap = cv2.VideoCapture(0)
+    # Start capturing video from the camera
+    cap = cv2.VideoCapture(0)
 
-#     if not cap.isOpened():
-#         st.write("Error: Could not access the camera.")
-#         pass
+    if not cap.isOpened():
+        st.write("Error: Could not access the camera.")
+        pass
 
-#     # Create an empty container for updating the frame
-#     frame_placeholder = st.empty()
+    # Create an empty container for updating the frame
+    frame_placeholder = st.empty()
 
-#     while True:
-#         ret, frame = cap.read()
-#         if not ret:
-#             st.write("Failed to grab frame.")
-#             break
+    while True:
+        ret, frame = cap.read()
+        if not ret:
+            st.write("Failed to grab frame.")
+            break
         
-#         # Convert the frame to RGB for mediapipe
-#         frame_rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+        # Convert the frame to RGB for mediapipe
+        frame_rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
         
-#         # Process the frame using Mediapipe
-#         results = hands.process(frame_rgb)
+        # Process the frame using Mediapipe
+        results = hands.process(frame_rgb)
 
-#         # If hand landmarks are detected, draw them on the frame
-#         if results.multi_hand_landmarks:
-#             for hand_landmarks in results.multi_hand_landmarks:
-#                 mp_draw.draw_landmarks(frame, hand_landmarks, mp_hands.HAND_CONNECTIONS)
+        # If hand landmarks are detected, draw them on the frame
+        if results.multi_hand_landmarks:
+            for hand_landmarks in results.multi_hand_landmarks:
+                mp_draw.draw_landmarks(frame, hand_landmarks, mp_hands.HAND_CONNECTIONS)
                 
-#             # Prepare the data for model prediction
-#             x_ = []
-#             y_ = []
-#             data_aux = []
-#             for i in range(len(hand_landmarks.landmark)):
-#                 x = hand_landmarks.landmark[i].x
-#                 y = hand_landmarks.landmark[i].y
-#                 x_.append(x)
-#                 y_.append(y)
-#                 data_aux.append(x - min(x_))
-#                 data_aux.append(y - min(y_))
+            # Prepare the data for model prediction
+            x_ = []
+            y_ = []
+            data_aux = []
+            for i in range(len(hand_landmarks.landmark)):
+                x = hand_landmarks.landmark[i].x
+                y = hand_landmarks.landmark[i].y
+                x_.append(x)
+                y_.append(y)
+                data_aux.append(x - min(x_))
+                data_aux.append(y - min(y_))
 
-#             # Reshape data for prediction
-#             data_aux = np.asarray(data_aux).reshape(1, -1)
-#             prediction = model.predict(data_aux)
+            # Reshape data for prediction
+            data_aux = np.asarray(data_aux).reshape(1, -1)
+            prediction = model.predict(data_aux)
 
-#             # Get the predicted class and its probability
-#             predicted_class_index = np.argmax(prediction, axis=1)[0]
-#             predicted_probability = prediction[0][predicted_class_index]
+            # Get the predicted class and its probability
+            predicted_class_index = np.argmax(prediction, axis=1)[0]
+            predicted_probability = prediction[0][predicted_class_index]
 
-#             # Check if the prediction is above a threshold (e.g., 30%)
-#             if predicted_probability >= 0.3:
-#                 predicted_key = str(predicted_class_index)
-#                 predicted_character = label_dict.get(predicted_key, 'Unknown')
-#             else:
-#                 predicted_character = 'Unknown'
+            # Check if the prediction is above a threshold (e.g., 30%)
+            if predicted_probability >= 0.3:
+                predicted_key = str(predicted_class_index)
+                predicted_character = label_dict.get(predicted_key, 'Unknown')
+            else:
+                predicted_character = 'Unknown'
 
-#             # Display the prediction and the frame
-#             frame_bgr = cv2.cvtColor(frame, cv2.COLOR_RGB2BGR)  # Convert back to BGR for Streamlit
-#             frame_placeholder.image(frame_bgr, caption=f"Prediction: {predicted_character} ({predicted_probability * 100:.2f}%)", channels="BGR")
-#         else:
-#             frame_placeholder.image(frame, caption="No hand detected.", channels="BGR")
+            # Display the prediction and the frame
+            frame_bgr = cv2.cvtColor(frame, cv2.COLOR_RGB2BGR)  # Convert back to BGR for Streamlit
+            frame_placeholder.image(frame_bgr, caption=f"Prediction: {predicted_character} ({predicted_probability * 100:.2f}%)", channels="BGR")
+        else:
+            frame_placeholder.image(frame, caption="No hand detected.", channels="BGR")
 
-#     cap.release()
-
-    import cv2
-    from streamlit_webrtc import VideoTransformerBase, webrtc_streamer
-
-    faceCascade = cv2.CascadeClassifier(cv2.haarcascades+'haarcascade_frontalface_default.xml')
+    cap.release()
 
 
-    class VideoTransformer(VideoTransformerBase):
-        def init(self):
-            self.i = 0
-
-        def transform(self, frame):
-            img = frame.to_ndarray(format="bgr24")
-            gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
-            faces = faceCascade.detectMultiScale(gray, 1.3, 5)
-            i =self.i+1
-            for (x, y, w, h) in faces:
-                cv2.rectangle(img, (x, y), (x + w, y + h), (95, 207, 30), 3)
-                cv2.rectangle(img, (x, y - 40), (x + w, y), (95, 207, 30), -1)
-                cv2.putText(img, 'F-' + str(i), (x, y - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.8, (0, 0, 0), 2)
-
-            return img
-
-    webrtc_streamer(key="example", video_transformer_factory=VideoTransformer)
 
 
 # Quiz feature
