@@ -246,6 +246,27 @@ except Exception as e:
 
 
 
+import requests
+import os
+
+def download_camera_js():
+    # URL of the raw camera.js file in your GitHub repo
+    url = 'https://raw.githubusercontent.com/Aamirul57/StreamlitASL/refs/heads/main/camera.js'
+    file_path = './camera.js'
+
+    # Download the file
+    response = requests.get(url)
+
+    # Check if the request was successful
+    if response.status_code == 200:
+        # Save the file locally
+        with open(file_path, 'w') as file:
+            file.write(response.text)
+        print(f"File 'camera.js' downloaded successfully.")
+    else:
+        print(f"Failed to download 'camera.js'. Status code: {response.status_code}")
+
+
 def sign_detection():
     st.subheader("Real-time Sign Detection")
     st.write("Point your camera to detect ASL signs in real-time.")
