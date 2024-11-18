@@ -1,0 +1,9 @@
+name: streamlit-app
+channels:
+  - conda-forge
+  - defaults
+dependencies:
+  - python=3.9   # Specifies the Python version
+  - pip          # Ensures pip is available in the environment
+  - pip:
+    - -r requirements.txt   # This installs dependencies from the requirements.txt file
