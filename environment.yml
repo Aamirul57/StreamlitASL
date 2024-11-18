@@ -9,7 +9,7 @@ dependencies:
   - pip:
       - streamlit
       - streamlit-webrtc
-      - opencv-python
+      # - opencv-python
       - mediapipe
       - numpy
       - pandas

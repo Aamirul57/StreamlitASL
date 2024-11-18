@@ -9,9 +9,6 @@ from tensorflow.keras.models import load_model
 import mediapipe as mp
 import requests
 
-from streamlit_webrtc import webrtc_streamer, VideoTransformerBase
-import av
-
 import streamlit.components.v1 as components
 
 
