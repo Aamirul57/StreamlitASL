@@ -1,18 +1,22 @@
-name: myenv
+name: myenv  # Name of the conda environment
+
 channels:
-  - defaults
-  - conda-forge
+  - conda-forge  # Use conda-forge channel for most packages
+  - defaults  # Default channel as a fallback
+
 dependencies:
-  - python=3.9
-  - tensorflow
-  - opencv
-  - numpy
-  - pandas
-  - matplotlib
-  - pip
+  - python=3.9  # Specify Python version
+  - pip  # Ensure pip is available to install additional packages
+  - streamlit  # Core Streamlit library
+  - streamlit-webrtc  # WebRTC component for Streamlit
+  - mediapipe  # Mediapipe library for machine learning models
+  - numpy  # Core scientific computing package
+  - pandas  # Data analysis library
+  - matplotlib  # Plotting and visualization library
+  - gdown  # To download files from Google Drive
+  - opencv-python  # OpenCV for computer vision tasks
+  - tensorflow  # Deep learning library
+
+  # Optional pip dependencies
   - pip:
-      - streamlit
-      - streamlit-webrtc
-      - mediapipe
-      - gdown
-      - streamlit-component-lib
+      - streamlit-component-lib  # Optional component library for Streamlit (if needed)
