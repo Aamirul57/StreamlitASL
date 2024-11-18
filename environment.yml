@@ -1,29 +1,10 @@
-# name: myenv
-# channels:
-#   - conda-forge
-#   - defaults
-# dependencies:
-#   - python=3.9
-#   - numpy
-#   - pandas
-#   - matplotlib
-#   - tensorflow
-#   - opencv
-#   - gdown
-#   - pip  # Enables pip for packages unavailable through Conda
-#   - pip:
-#       - streamlit
-#       - streamlit-webrtc
-#       - opencv-python
-#       - mediapipe
-
-
 name: myenv
 channels:
   - defaults
   - conda-forge
 dependencies:
   - python=3.9
+  - opencv
   - pip
   - pip:
       - streamlit
