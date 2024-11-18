@@ -4,15 +4,15 @@ channels:
   - conda-forge
 dependencies:
   - python=3.9
+  - tensorflow
+  - opencv
+  - numpy
+  - pandas
+  - matplotlib
   - pip
-  - tensorflow  # Install TensorFlow via conda
   - pip:
       - streamlit
       - streamlit-webrtc
       - mediapipe
-      - numpy
-      - pandas
-      - matplotlib
       - gdown
       - streamlit-component-lib
-      - opencv-python
