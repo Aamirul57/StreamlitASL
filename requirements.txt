@@ -1,0 +1,10 @@
+streamlit
+streamlit-webrtc
+mediapipe
+numpy
+pandas
+matplotlib
+gdown
+opencv-python
+tensorflow
+streamlit-component-lib
