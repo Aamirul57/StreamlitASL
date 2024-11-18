@@ -259,77 +259,7 @@ def sign_detection():
     st.subheader("Real-time Sign Detection")
     st.write("Point your camera to detect ASL signs in real-time.")
 
-    # # Setup MediaPipe Hands
-    # mp_hands = mp.solutions.hands
-    # hands = mp_hands.Hands(min_detection_confidence=0.7, min_tracking_confidence=0.5)
-    # mp_draw = mp.solutions.drawing_utils
-
-    # # Declare custom component for webcam (JavaScript)
-    # component_value = components.declare_component("webcam_component", path="./camera")
-
-    # # Capture image from webcam component
-    # if component_value:
-    #     image_data = component_value.get("image", None)
-    #     if image_data:
-    #         # Process the captured frame
-    #         img = np.array(Image.open(io.BytesIO(image_data)))
-
-    #         # Convert to RGB for MediaPipe processing
-    #         img_rgb = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
-    #         results = hands.process(img_rgb)
-
-    #         data_aux = []
-    #         x_ = []
-    #         y_ = []
-
-    #         if results.multi_hand_landmarks:
-    #             for hand_landmarks in results.multi_hand_landmarks:
-    #                 mp_draw.draw_landmarks(
-    #                     img,
-    #                     hand_landmarks,
-    #                     mp_hands.HAND_CONNECTIONS
-    #                 )
-
-    #                 for i in range(len(hand_landmarks.landmark)):
-    #                     x = hand_landmarks.landmark[i].x
-    #                     y = hand_landmarks.landmark[i].y
-
-    #                     x_.append(x)
-    #                     y_.append(y)
-
-    #                 for i in range(len(hand_landmarks.landmark)):
-    #                     x = hand_landmarks.landmark[i].x
-    #                     y = hand_landmarks.landmark[i].y
-    #                     data_aux.append(x - min(x_))
-    #                     data_aux.append(y - min(y_))
-
-    #             # Prepare data for prediction
-    #             data_aux = np.asarray(data_aux).reshape(1, -1)
-    #             prediction = model.predict(data_aux)
-
-    #             # Get predicted class and confidence
-    #             predicted_class_index = np.argmax(prediction, axis=1)[0]
-    #             predicted_probability = prediction[0][predicted_class_index]
-
-    #             if predicted_probability >= 0.3:
-    #                 predicted_key = str(predicted_class_index)
-    #                 predicted_character = label_dict.get(predicted_key, 'Unknown')
-    #             else:
-    #                 predicted_character = 'Unknown'
-
-    #             # Draw the prediction on the image (for display)
-    #             x1 = int(min(x_) * img.shape[1]) - 10
-    #             y1 = int(min(y_) * img.shape[0]) - 10
-    #             x2 = int(max(x_) * img.shape[1]) - 10
-    #             y2 = int(max(y_) * img.shape[0]) - 10
-
-    #             cv2.rectangle(img, (x1, y1), (x2, y2), (255, 75, 255), 4)
-    #             cv2.putText(img, f'{predicted_character} ({predicted_probability * 100:.2f}%)', (x1, y1 - 10),
-    #                         cv2.FONT_HERSHEY_SIMPLEX, 1.3, (255, 75, 255), 3, cv2.LINE_AA)
-
-    #         st.image(img, channels="BGR", use_column_width=True)
-
-      # Camera feed with prediction
+    # Camera feed with prediction
     run_camera = st.checkbox("Open Camera")
     FRAME_WINDOW = st.image([])
 
