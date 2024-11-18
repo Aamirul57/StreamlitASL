@@ -255,49 +255,56 @@ def download_camera_js():
         print(f"Failed to download 'camera.js'. Status code: {response.status_code}")
 
 
+import streamlit as st
+import streamlit.components.v1 as components
+
 def sign_detection():
     st.subheader("Real-time Sign Detection")
     st.write("Point your camera to detect ASL signs in real-time.")
 
     # Camera feed with prediction
-    run_camera = st.checkbox("Open Camera")
+    run_camera = st.checkbox("Open Camera", value=True)
     FRAME_WINDOW = st.image([])
 
     # Placeholder for detected gesture display
     gesture_display = st.empty()
 
-    if run_camera and model is not None:
-        cap = cv2.VideoCapture(1)  # Use 0 for default camera if 1 doesn't work
+    if run_camera:
+        # JavaScript for capturing webcam feed
+        html_code = """
+        <html>
+            <body>
+                <h3>Real-time Camera Feed</h3>
+                <video id="webcam" width="640" height="480" autoplay></video>
+                
+                <script>
+                    // Access webcam using getUserMedia API
+                    navigator.mediaDevices.getUserMedia({ video: true })
+                    .then(function(stream) {
+                        // Attach the webcam stream to the video element
+                        document.getElementById("webcam").srcObject = stream;
+                    })
+                    .catch(function(error) {
+                        console.log("Error accessing webcam:", error);
+                        alert("Could not access webcam. Please check your browser permissions.");
+                    });
+                </script>
+            </body>
+        </html>
+        """
 
-        if cap.isOpened():
-            while run_camera:
-                ret, frame = cap.read()
-                if not ret:
-                    st.error("Failed to access the camera.")
-                    break
+        # Embed the HTML and JavaScript code into Streamlit
+        components.html(html_code, height=500)
 
-                # Show camera feed
-                frame_rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
-                FRAME_WINDOW.image(frame_rgb)
+        # Placeholder for gesture prediction (this can be replaced with actual gesture recognition later)
+        gesture_text = 'A'  # Placeholder detected gesture
+        confidence = 0.95  # Placeholder confidence score
 
-                # # Predict gesture and get confidence
-                # # gesture, confidence = predict_gesture(frame_rgb)
-                # # gesture_text = gesture_mapping.get(gesture, "Unknown gesture")
-                # predicted_key = str(predicted_class_index)
-                # predicted_character = label_dict.get(predicted_key, 'Unknown')
+        # Display detected gesture
+        gesture_display.subheader(f"Detected Gesture: {gesture_text} (Confidence: {confidence:.2f})")
 
-                gesture_text = 'A'
-                confidence = 2
-
-
-
-                # Display detected gesture
-                gesture_display.subheader(f"Detected Gesture: {gesture_text} (Confidence: {confidence:.2f})")
-
-            cap.release()
-
-
-
+    else:
+        st.write("Camera is off.")
 
 
 

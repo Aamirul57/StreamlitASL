@@ -8,3 +8,4 @@ gdown
 opencv-python-headless
 tensorflow
 streamlit-component-lib
+requests
