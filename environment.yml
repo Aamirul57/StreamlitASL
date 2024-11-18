@@ -5,6 +5,6 @@ channels:
 dependencies:
   - python=3.9   # Specifies the Python version
   - pip          # Ensures pip is available in the environment
-  - opencv
   - pip:
     - -r requirements.txt   # This installs dependencies from the requirements.txt file
+    - opencv-python-headless
