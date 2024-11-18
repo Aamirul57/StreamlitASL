@@ -1,27 +1,46 @@
-const videoElement = document.createElement('video');
-const canvasElement = document.createElement('canvas');
-const context = canvasElement.getContext('2d');
+// camera.js
+import React, { useRef, useEffect } from "react";
+import { Streamlit } from "streamlit-component-lib";
 
-// Start the video stream
-navigator.mediaDevices.getUserMedia({ video: true })
-  .then((stream) => {
-    videoElement.srcObject = stream;
-    videoElement.play();
+const CameraComponent = () => {
+  const videoRef = useRef(null);
 
-    // Continuously capture frames from the video
-    function captureFrame() {
-      context.drawImage(videoElement, 0, 0, canvasElement.width, canvasElement.height);
-      
-      // Send the frame to Python for processing (using Streamlit's message system)
-      const imageData = canvasElement.toDataURL('image/jpeg');
-      window.parent.postMessage({ image_data: imageData }, '*');
-      
-      // Call the captureFrame again to continuously send frames
-      requestAnimationFrame(captureFrame);
+  useEffect(() => {
+    if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+      navigator.mediaDevices.getUserMedia({ video: true })
+        .then(stream => {
+          videoRef.current.srcObject = stream;
+          videoRef.current.play();
+        })
+        .catch(err => {
+          console.error("Error accessing webcam: ", err);
+          Streamlit.setComponentValue({ error: "Failed to access webcam" });
+        });
+    } else {
+      console.error("Camera not supported");
+      Streamlit.setComponentValue({ error: "Camera not supported" });
     }
+  }, []);
 
-    captureFrame();
-  })
-  .catch((err) => {
-    console.error('Error accessing webcam: ', err);
-  });
+  const captureFrame = () => {
+    const canvas = document.createElement("canvas");
+    const context = canvas.getContext("2d");
+    const video = videoRef.current;
+
+    canvas.width = video.videoWidth;
+    canvas.height = video.videoHeight;
+    context.drawImage(video, 0, 0, canvas.width, canvas.height);
+
+    const dataUrl = canvas.toDataURL("image/png");
+    Streamlit.setComponentValue({ image: dataUrl });
+  };
+
+  return (
+    <div>
+      <video ref={videoRef} width="100%" height="100%" />
+      <button onClick={captureFrame}>Capture Frame</button>
+    </div>
+  );
+};
+
+export default CameraComponent;
