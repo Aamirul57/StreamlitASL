@@ -5,7 +5,7 @@ numpy
 pandas
 matplotlib
 gdown
-opencv-python
+opencv-python-headless
 tensorflow
 streamlit-component-lib
 requests
