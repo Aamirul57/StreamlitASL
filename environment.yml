@@ -5,7 +5,7 @@ channels:
 dependencies:
   - python=3.9
   - opencv
-  -tensorflow
+  - tensorflow
   - pip
   - pip:
       - streamlit
