@@ -36,4 +36,5 @@ dependencies:
       - matplotlib
       - mediapipe
       - gdown
+      - streamlit-component-lib
     
