@@ -5,7 +5,7 @@ import random
 import cv2
 import numpy as np
 import os
-from tensorflow.keras.models import load_model
+# from tensorflow.keras.models import load_model
 import mediapipe as mp
 import requests
 
@@ -197,12 +197,6 @@ def show_progress(username):
     else:
         st.table(user_progress)
 
-import os
-from tensorflow.keras.models import load_model
-import streamlit as st
-import cv2
-import mediapipe as mp
-import numpy as np
 
 # Updated label dictionary
 label_dict = {
@@ -235,16 +229,13 @@ label_dict = {
 # Load the pre-trained model
 # model = load_model("./AisyahSignX100.keras")  # Replace with your actual model path
 
-try:
-    model = load_model("./AisyahSignX100.keras")
-    print("Model loaded successfully!")
-except Exception as e:
-    print("Error loading model:", e)
+# try:
+#     model = load_model("./AisyahSignX100.keras")
+#     print("Model loaded successfully!")
+# except Exception as e:
+#     print("Error loading model:", e)
 
 
-
-import requests
-import os
 
 def download_camera_js():
     # URL of the raw camera.js file in your GitHub repo
