@@ -5,11 +5,11 @@ import random
 import cv2
 import numpy as np
 import os
-# from tensorflow.keras.models import load_model
+from tensorflow.keras.models import load_model
 import mediapipe as mp
 import requests
 
-import streamlit.components.v1 as components
+# import streamlit.components.v1 as components
 
 
 
